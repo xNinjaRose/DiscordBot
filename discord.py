@@ -9,7 +9,7 @@ from discord.ext.commands import Bot, has_permissions, CheckFailure
 #import lyricwikia
 
 #Discord Bots Auth Token
-TOKEN = ("NTY2Mzc2ODUzMjUwNzY4OTg2.XLEHzg.aYcpsoW62bo5XS_y66PGit7C4uM")
+TOKEN = ("PUT TOKEN HERE")
 
 #tell the bot what key to start commands with
 client = commands.Bot(command_prefix=".",status=discord.Status.idle, activity=discord.Game(name="Booting.."))
