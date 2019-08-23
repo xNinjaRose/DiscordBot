@@ -5,11 +5,16 @@ import os
 import json
 import random 
 from discord.ext import commands 
+from discord import FFmpegPCMAudio
+from discord.utils import get
 from discord.ext.commands import Bot, has_permissions, CheckFailure
+import youtube_dl
+
+
 #import lyricwikia
 
 #Discord Bots Auth Token
-TOKEN = ("PUT TOKEN HERE")
+TOKEN = ("NTY2Mzc2ODUzMjUwNzY4OTg2.XLEHzg.aYcpsoW62bo5XS_y66PGit7C4uM")
 
 #tell the bot what key to start commands with
 client = commands.Bot(command_prefix=".",status=discord.Status.idle, activity=discord.Game(name="Booting.."))
@@ -30,6 +35,26 @@ async def on_member_join(member):
     guild=member.guild
     message = "Hello {}, Welcome to {} Discord Server, We hope you have an awesome stay in Radiant Garden, Be sure to check out the rules channel before posting! :tada: :purple_heart:".format(member.mention, guild.name)
     await channel.send(message)
+
+@client.command()
+async def join(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = await channel.connect()
+    await voice.move_to(channel)
+    await ctx.send(f"Joined {channel}")
+
+# @client.command()
+# async def leave(ctx):
+#     server = ctx.message.author.voice.channel
+#     await server.disconnect()
+
+# @client.command()
+# async def play(ctx,url):
+#     server = ctx.message.server
+#     voice_client = client.voice_clients(server)
+#     player = await voice_client.create_ytdl_player(url)
+#     players[server.id] = player
+#     player.start()
 
 #returns Pong from the bot
 @client.command()
@@ -55,7 +80,46 @@ async def user(ctx, member:discord.Member =None):
     status = member.status
     joined = member.joined_at
     role = member.top_role 
-    await ctx.channel.send(f"{pronoun} name is {name}, {pronoun} status is {status}, They joined at {joined}, {pronoun} rank is {role}")
+    activity = member.activity 
+    await ctx.channel.send(f"{pronoun} name is {name}, {pronoun} status is {status}, They joined at {joined}, {pronoun} rank is {role} and they are playing {activity}")
+
+@client.command()
+async def torchrng(ctx):
+    torch_diff = ["Normal","Hard","Very Hard"]
+    num_lifes = ["Hardcore","Non-Hardcore"]
+    torch_class = ["Destroyer","Vanquisher","Alchemist","Airbender","Assassin","Barbarian","Demonologist","Enchanter",
+                "Executioner","Fomar","Fury","Gunblade","Guardian","Ice Queen","Lady Knight","Nethermage","Paladin","Shaman",
+                "Sorceress","Spiritdancer","Stone Brother","Valkyrie","Warmage","Warlock"]
+    
+    await ctx.send(f"Your run will be {random.choice(torch_class)} on {random.choice(torch_diff)} with {random.choice(num_lifes)} enabled")
+
+@client.command()
+async def tq(ctx,answera):
+    if answera == "none":
+        masterynon = ["Warfare","Defense","Rune","Hunting"]
+        await ctx.send(f"Your build will be {random.choice(masterynon)} and {random.choice(masterynon)}")
+    elif answera == "all":
+        masteryall = ["Earth","Storm","Dream","Warfare","Spirit","Defense","Nature","Rune","Hunting","Rogue"]
+        await ctx.send(f"Your build will be {random.choice(masteryall)} and {random.choice(masteryall)}")
+
+@client.command()
+async def whois (ctx,gearname):
+    
+    dmgear = ["VladofSniper","EtechSniper","DahlSniper","HyperionShotgun","JakobsShotgun","TedioreShotgun","HyperionSmg",
+    "DahlSmg","BanditSmg","TediorePistol","MaliwanPistol","EtechPistol","VladofPistol","TorguePistol","DahlGrenade","MaliwanGrenade",
+    "BanditGrenade","PangolinShield","VladofShield","HyperionShield","DahlShield","VladofRpg","BanditRpg","TorgueRpg","JakobsAR",
+    "VladofAR","EtechAR"]
+
+    if gearname in dmgear:
+        await ctx.send("That is DMMD's piece of gear! :dog: Hands off!!")
+    else: 
+        await ctx.send("That is Neko's piece of gear! :cat: Hands off!!")
+
+
+@client.command()
+async def roll(ctx):
+    rollvar = ["Neko Wins The Round","DMMD Wins The Round"]
+    await ctx.send(f"Result: {random.choice(rollvar)}")
 
 @client.command()
 async def ask(ctx, *, question):
@@ -63,19 +127,32 @@ async def ask(ctx, *, question):
    # for response in responses:
     await ctx.send(f"Question: {question}\nAnswer: {random.choice(responses)}")
 
-#bans a user with a reason
+
+####################################################################################
+#BANS A USER WITH A REASON#
 @client.command()
 @commands.has_any_role("Keyblade Master","Foretellers")
 async def ban (ctx, member:discord.User=None, reason =None):
-    if member == None or member == ctx.message.author:
-        await ctx.channel.send("You cannot ban yourself")
-        return
-    if reason == None:
-        reason = "For being a jerk!"
-    message = f"You have been banned from {ctx.guild.name} for {reason}"
-    await member.send(message)
-    # await ctx.guild.ban(member)
-    await ctx.channel.send(f"{member} is banned!")
+    
+        if member == None or member == ctx.message.author:
+            await ctx.channel.send("You cannot ban yourself")
+            return
+        
+        elif reason == None:
+            reason = "being a jerk!"
+            
+        message = f"You have been banned from {ctx.guild.name} for {reason}"
+        await member.send(message)
+        # await ctx.guild.ban(member)
+        await ctx.channel.send(f"{member} is banned!") 
+
+@ban.error
+async def ban_error(ctx, error):
+    if isinstance(error, commands.MissingAnyRole):
+        await ctx.send("You do not have permission to do that!")
+    else:
+        raise error
+###################################################################################     
 
 
 @client.command()
@@ -96,6 +173,8 @@ async def dmmd(ctx):
     embed.set_thumbnail(url="https://pngimage.net/wp-content/uploads/2018/06/neptunia-png-4.png")
     await ctx.send(embed=embed)
 
+##########################################################################################
+#PURGES MESSAGES IN CHANNELS .PURGE 20 - 20 LINES ABOVE INCLUDING THAT LINE
 @client.command()
 @commands.has_any_role("Keyblade Master","Foretellers")
 async def purge(ctx, amount: int):
@@ -103,9 +182,10 @@ async def purge(ctx, amount: int):
     await ctx.send(f"Deleted {len(deleted)} messages")
 
 @purge.error
-async def purge_error(error, ctx):
-    if isinstance(error, CheckFailure):
+async def purge_error(ctx, error):
+    if isinstance(error, commands.MissingAnyRole):
         await ctx.channel.send("Looks like you don't have permission for that!")
+##########################################################################################
 
 @client.command()
 async def dmmdbl2(ctx):
@@ -119,7 +199,7 @@ async def dmmdbl2(ctx):
 @client.command()
 async def dmmdtq(ctx):
     embed = discord.Embed(title="TitanQuest Personal Best",description="The Personal Best Permadeath Stats")
-    embed.add_field(name="Best Permadeath",value="Level 8")
+    embed.add_field(name="Best Permadeath",value="Level 37 Berserker Post-Shade Feaster")
     embed.set_thumbnail(url="https://store-images.s-microsoft.com/image/apps.4301.13510798887926315.4daba2a4-159c-4d0a-9f90-d1c6f64c550d.0669b37a-aa6f-451d-b2d8-8752b9736d42")
     await ctx.channel.send(embed=embed)
 
@@ -174,6 +254,7 @@ async def on_message(message):
         embed.add_field(name="!users", value ="Prints the number of users")
         embed.add_field(name=".user", value ="Shows user stats")
         embed.add_field(name=".ban", value ="Bans a user(only super mods)")
+        embed.add_field(name="!tq", value ="Either All or None to randomize your TQ build")
         embed.add_field(name=".nepscore", value ="Shows NepFul PermaDeath Challenge Scores")
         embed.add_field(name=".dmmd", value ="Shouts out DMMD's twitch stream")
         embed.add_field(name=".purge", value ="Purge a # of lines(SuperMod only)")
