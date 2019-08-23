@@ -14,7 +14,7 @@ import youtube_dl
 #import lyricwikia
 
 #Discord Bots Auth Token
-TOKEN = ("NTY2Mzc2ODUzMjUwNzY4OTg2.XLEHzg.aYcpsoW62bo5XS_y66PGit7C4uM")
+TOKEN = ("PLACE TOKEN HERE")
 
 #tell the bot what key to start commands with
 client = commands.Bot(command_prefix=".",status=discord.Status.idle, activity=discord.Game(name="Booting.."))
